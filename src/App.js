@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocalStorage } from 'usehooks-ts'
 
 import Form from './components/Form';
 import MainTable from './components/MainTable';
@@ -28,10 +29,20 @@ const EXAMPLE_PERSONS = [
 //this would need to update eery time there's a new item or new person added to the list
 
 const App = () => {
-  const [expenses, setExpenses] = useState(EXAMPLE_EXPENSES)
-  const [persons, setPersons] = useState(EXAMPLE_PERSONS)
+  const [expenses, setExpenses] = useState(JSON.parse(localStorage.getItem('expenses'), (_key, value) => value instanceof Object && value.dataType == "Set" ? new Set(value.value) : value) || EXAMPLE_EXPENSES)
+  const [persons, setPersons] = useState(JSON.parse(localStorage.getItem('persons')) || EXAMPLE_PERSONS)
   const [tax, setTax] = useState(0)
   const [tip, setTip] = useState(0)
+
+  console.log(expenses)
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses, (_key, value) => (value instanceof Set ? {dataType: 'Set', value: [...value]} : value)))
+    console.log(JSON.stringify(expenses))
+  }, [expenses]) 
+
+  useEffect(() => {
+    localStorage.setItem('persons', JSON.stringify(persons))
+  }, [persons])
 
   const addExpenseHandler = (expense) => {
     setExpenses(prevExpenses => {
